@@ -48,7 +48,7 @@ class PostgresqlAdapter(IDatabaseAdapter):
         finally:
             cursor.close()
 
-    def read(self, sql):
+    def fetch_all(self, sql):
         """
         讀取資料
         """

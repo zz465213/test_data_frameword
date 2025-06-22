@@ -32,13 +32,13 @@ class MysqlAdapter(IDatabaseAdapter):
         }
         return db_config
 
-    def insert(self, sql):
+    def insert(self, sql, params=None):
         """
         插入資料
         """
         cursor = self.conn.cursor()
         try:
-            cursor.execute(sql)
+            cursor.execute(sql, params)
             self.conn.commit()
             logging.info(f"🟢 新增資料成功")
         except mysql.connector.Error as e:
@@ -48,9 +48,9 @@ class MysqlAdapter(IDatabaseAdapter):
         finally:
             cursor.close()
 
-    def read(self, sql):
+    def fetch_all(self, sql):
         """
-        讀取資料
+        讀取多筆資料
         """
         cursor = self.conn.cursor(dictionary=True)
         try:

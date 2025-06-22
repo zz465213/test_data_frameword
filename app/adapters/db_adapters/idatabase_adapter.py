@@ -11,7 +11,7 @@ class IDatabaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def read(self, **kwargs):
+    def fetch_all(self, **kwargs):
         pass
 
     @abstractmethod
