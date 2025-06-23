@@ -48,13 +48,13 @@ class MysqlAdapter(IDatabaseAdapter):
         finally:
             cursor.close()
 
-    def fetch_all(self, sql):
+    def fetch_all(self, sql, params=None):
         """
         讀取多筆資料
         """
         cursor = self.conn.cursor(dictionary=True)
         try:
-            cursor.execute(sql)
+            cursor.execute(sql, params)
             read_data = cursor.fetchall()
             logging.info(f"🟢 查詢資料成功")
             return read_data

@@ -39,8 +39,7 @@ your_test_data_framework/
 │   ├── __init__.py
 │   ├── common_paths.py               # 共用路徑
 │   ├── config.yaml                   # 設定檔 (例如: 資料庫連線字串, API key)
-│   ├── global_adapter.py             # 全域變數設定
-│   └── swagger.yaml                  # 手動定義的 Swagger/OpenAPI 規範 (如果沒有自動生成)
+│   └── global_adapter.py             # 全域變數設定                 
 ├── tests/                            # 測試目錄
 ├── requirements.txt                  # 專案依賴套件
 └── run.py                            # 啟動 Flask 應用程式的入口點 

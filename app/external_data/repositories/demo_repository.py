@@ -1,44 +1,35 @@
 import logging
 from app.adapters.db_factory import DBFactory
-from app.utils.file_tool import read_yaml
 from app.models.member_demo import MemberDemo
-from app.models.account_demo import AccountDemo
-from configs.common_paths import CONFIGS_FILE
 from typing import List, Optional
 
 
 class DemoRepository:
-    def __init__(self):
+    def __init__(self, db_config: dict):
         self.logger = logging.getLogger(__name__)
-        self.mysql = DBFactory().get_mysql(
-            host=read_yaml(CONFIGS_FILE)["mysql"]["host"],
-            user=read_yaml(CONFIGS_FILE)["mysql"]["user"],
-            password=read_yaml(CONFIGS_FILE)["mysql"]["password"],
-            database=read_yaml(CONFIGS_FILE)["mysql"]["database"]
-        )
+        self.mysql = DBFactory().get_mysql(**db_config)
 
-    def create_member(self, member_demo: MemberDemo, params: tuple) -> MemberDemo:
+    def create_member(self, member_demo: MemberDemo) -> int:
+        """
+        創建成員資料
+        Returns: 新建立的成員 ID
+        """
         sql = "INSERT INTO member (username, email, phone, age) VALUES (%s, %s, %s, %s)"
-        try:
-            self.mysql.insert(sql, params)
-            logging.info(f"🟢 成員資料建立成功，使用者名稱: {member_demo.username}, Email: {member_demo.email},"
-                         f" 電話: {member_demo.phone}, 年齡:{member_demo.age}")
-        except Exception as e:
-            logging.error(f"🔴 建立成員資料發生非預期錯誤, {e}")
-            raise
+        params = (member_demo.username, member_demo.email, member_demo.phone, member_demo.age)
 
-    def create_account(self, account_demo: AccountDemo) -> MemberDemo:
-        sql = "INSERT INTO member (username, password)"
-        f"VALUES ({account_demo.username}, {account_demo.password});"
         try:
-            self.mysql.insert(sql)
-            logging.info(f"🟢 成員資料建立成功，使用者名稱: {account_demo.username}, 密碼: {account_demo.password}")
+            result = self.mysql.insert(sql, params)
+            member_id = result.lastrowid if hasattr(result, 'lastrowid') else None
+
+            self.logger.info(f"🟢 成員資料建立成功，ID: {member_id}, 使用者名稱: {member_demo.username}")
+            return member_id
+
         except Exception as e:
-            logging.error(f"🔴 建立帳號資料發生非預期錯誤, {e}")
+            self.logger.error(f"🔴 建立成員資料發生錯誤: {e}")
             raise
 
     def get_member_all_data(self) -> List[MemberDemo]:
-        sql = "SELECT * FROM member"
+        sql = "SELECT username, email, phone, age FROM member"
         try:
             return self.mysql.fetch_all(sql)
         except Exception as e:
@@ -46,9 +37,9 @@ class DemoRepository:
             raise
 
     def get_member_by_phone(self, phone_no: str) -> Optional[MemberDemo]:
-        sql = f"SELECT * FROM member WHERE phone = {phone_no}"
+        sql = "SELECT username, email, phone, age FROM member WHERE phone = %s"
         try:
-            return self.mysql.fetch_all(sql)
+            return self.mysql.fetch_all(sql, (phone_no,))
         except Exception as e:
             logging.error(f"🔴 使用 {phone_no} 搜尋成員資料發生非預期錯誤, {e}")
             raise
