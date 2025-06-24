@@ -58,8 +58,6 @@ def create_app():
 
 
 if __name__ == '__main__':
-    # TODO: Model 限制條件確認
-    # TODO: 思考是否run.py的DI需要保留
     # TODO: Logs 撰寫邏輯
     app = create_app()
     app.run(debug=True, host='0.0.0.0', port=5000)
