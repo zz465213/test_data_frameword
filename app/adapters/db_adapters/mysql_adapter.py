@@ -4,18 +4,14 @@ from app.adapters.db_adapters.idatabase_adapter import IDatabaseAdapter
 
 
 class MysqlAdapter(IDatabaseAdapter):
-    def __init__(self, host, user, password, database):
+    def __init__(self, db_config):
         self.logger = logging.getLogger(__name__)
-        self.host = host
-        self.user = user
-        self.password = password
-        self.database = database
-        self.db_config = self._db_config()
-        self.conn = self._connect()
+        self._db_config = db_config
+        self._conn = self._connect()
 
     def _connect(self):
         try:
-            conn = mysql.connector.connect(**self.db_config)
+            conn = mysql.connector.connect(**self._db_config)
             logging.info(f"🟢 MySQL DB 連線成功")
             return conn
         except mysql.connector.Error as e:
@@ -23,28 +19,18 @@ class MysqlAdapter(IDatabaseAdapter):
         except Exception as e:
             logging.error(f"🔴 MySQL DB 連線發生非預期錯誤: {e}")
 
-    def _db_config(self):
-        db_config = {
-            "host": self.host,
-            "user": self.user,
-            "password": self.password,
-            "database": self.database
-        }
-        return db_config
-
     def insert(self, sql, params=None):
         """
         插入資料
         """
-        cursor = self.conn.cursor()
+        cursor = self._conn.cursor()
         try:
             cursor.execute(sql, params)
-            self.conn.commit()
-            logging.info(f"🟢 新增資料成功")
+            self._conn.commit()
+            logging.info(f"🟢 新增 MySQL 資料成功")
         except mysql.connector.Error as e:
-            logging.error(f"🔴 新增資料失敗: {e}")
-            self.conn.rollback()
-            self.close()
+            logging.error(f"🔴 新增 MySQL 資料失敗: {e}")
+            self._conn.rollback()
         finally:
             cursor.close()
 
@@ -52,15 +38,14 @@ class MysqlAdapter(IDatabaseAdapter):
         """
         讀取多筆資料
         """
-        cursor = self.conn.cursor(dictionary=True)
+        cursor = self._conn.cursor(dictionary=True)
         try:
             cursor.execute(sql, params)
             read_data = cursor.fetchall()
-            logging.info(f"🟢 查詢資料成功")
+            logging.info(f"🟢 查詢 MySQL 資料成功")
             return read_data
         except mysql.connector.Error as e:
-            logging.error(f"🔴 查詢資料失敗: {e}")
-            self.close()
+            logging.error(f"🔴 查詢 MySQL 資料失敗: {e}")
         finally:
             cursor.close()
 
@@ -69,7 +54,7 @@ class MysqlAdapter(IDatabaseAdapter):
         關閉資料庫連線
         """
         try:
-            self.conn.close()
+            self._conn.close()
             logging.info(f"🟢 MySQL DB 連線已關閉")
         except Exception as e:
             logging.error(f"🔴 MySQL DB 關閉連線非預期錯誤: {e}")

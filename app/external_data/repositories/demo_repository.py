@@ -5,9 +5,9 @@ from typing import List, Optional
 
 
 class DemoRepository:
-    def __init__(self, db_config: dict):
+    def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.mysql = DBFactory().get_mysql(**db_config)
+        self.mysql = DBFactory().get_mysql()
 
     def create_member(self, member_demo: MemberDemo) -> int:
         """

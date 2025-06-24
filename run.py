@@ -2,8 +2,6 @@ import logging
 from app.controllers.demo_controller import DemoController
 from app.external_data.repositories.demo_repository import DemoRepository
 from app.services.demo_service import DemoService
-from app.utils.file_tool import read_yaml
-from configs.common_paths import CONFIGS_FILE
 from flask import Flask, jsonify
 from flasgger import Swagger
 from flask_cors import CORS
@@ -33,12 +31,8 @@ def create_app():
     # 初始化swagger
     Swagger(app)
 
-    # 統一配置
-    config = read_yaml(CONFIGS_FILE)
-    mysql_config = config["mysql"]
-
     # 依賴注入
-    demo_repository = DemoRepository(mysql_config)
+    demo_repository = DemoRepository()
     demo_service = DemoService(demo_repository)
     demo_controller = DemoController(demo_service)
     app.register_blueprint(demo_controller.bp, url_prefix='/api')  # 註冊 Controller 內部的藍圖
@@ -65,7 +59,7 @@ def create_app():
 
 if __name__ == '__main__':
     # TODO: Model 限制條件確認
-    # TODO: 思考是否run.py的DI注入需要保留
+    # TODO: 思考是否run.py的DI需要保留
     # TODO: Logs 撰寫邏輯
     app = create_app()
     app.run(debug=True, host='0.0.0.0', port=5000)

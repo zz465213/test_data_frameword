@@ -3,3 +3,9 @@ mysql:
   user: "root"
   password: "root"
   database: "demo"
+
+postgresql:
+  host: "localhost"
+  user: "root"
+  password: "root"
+  database: "demo"
