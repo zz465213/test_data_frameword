@@ -18,6 +18,11 @@ your_test_data_framework/
 │   ├── controllers/                  # 處理 HTTP 請求，調用 Service
 │   │   ├── __init__.py
 │   │   └── **_controller.py
+│   ├── exceptions/                   # bug例外處理
+│   │   ├── __init__.py
+│   │   ├── app_error_codes.py        # 錯誤碼管理
+│   │   ├── base_app_exception.py     # http基本例外
+│   │   └── *_exception.py            # 其他客製化例外
 │   ├── external_data/                # 外部資料整合層
 │   │   ├── integrations/             # 外部 API 整合層 (特殊 Repository)
 │   │   │   ├── __init__.py

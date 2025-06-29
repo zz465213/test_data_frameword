@@ -1,4 +1,5 @@
-import logging
+import mysql.connector
+import psycopg2
 from app.adapters.db_adapters.postgresql_adapter import PostgresqlAdapter
 from app.adapters.db_adapters.mysql_adapter import MysqlAdapter
 from app.utils.file_tool import read_yaml
@@ -8,7 +9,6 @@ from configs.common_paths import CONFIGS_FILE
 class DBFactory:
 
     def __init__(self):
-        self.logger = logging.getLogger(__name__)
         self._get_config = read_yaml(CONFIGS_FILE)
 
     def get_mysql(self) -> MysqlAdapter:
@@ -27,5 +27,4 @@ class DBFactory:
 
 
 if __name__ == "__main__":
-    mysql = DBFactory().get_mysql()
-
+    pass

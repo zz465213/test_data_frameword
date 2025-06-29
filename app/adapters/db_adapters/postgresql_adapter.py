@@ -15,9 +15,9 @@ class PostgresqlAdapter(IDatabaseAdapter):
             logging.info(f"🟢 PostgreSQL DB 連線成功")
             return conn
         except psycopg2.Error as e:
-            logging.error(f"🔴 PostgreSQL DB 連線錯誤: {e}")
+            raise psycopg2.Error(f"🔴[DEBUG]: PostgreSQL DB 連線錯誤: {e}")
         except Exception as e:
-            logging.error(f"🔴 PostgreSQL DB 連線發生非預期錯誤: {e}")
+            raise psycopg2.Error(f"🔴[DEBUG]: PostgreSQL DB 連線發生非預期錯誤: {e}")
 
     def insert(self, sql, params=None):
         """
@@ -27,10 +27,12 @@ class PostgresqlAdapter(IDatabaseAdapter):
         try:
             cursor.execute(sql, params)
             self._conn.commit()
-            logging.info(f"🟢 新增 PostgreSQL 資料成功")
         except psycopg2.Error as e:
-            logging.error(f"🔴 新增 PostgreSQL 資料失敗: {e}")
             self._conn.rollback()
+            raise psycopg2.Error(f"🔴[DEBUG]: 新增 PostgreSQL 資料失敗: {e}")
+        except Exception as e:
+            self._conn.rollback()
+            raise psycopg2.Error(f"🔴[DEBUG]: 新增 PostgreSQL 資料發生非預期錯誤: {e}")
         finally:
             cursor.close()
 
@@ -42,10 +44,11 @@ class PostgresqlAdapter(IDatabaseAdapter):
         try:
             cursor.execute(sql, params)
             read_data = cursor.fetchall()
-            logging.info(f"🟢 查詢 PostgreSQL 資料成功")
             return read_data
         except psycopg2.Error as e:
-            logging.error(f"🔴 查詢 PostgreSQL 資料失敗: {e}")
+            raise psycopg2.Error(f"🔴[DEBUG]: 查詢 PostgreSQL 資料失敗: {e}")
+        except Exception as e:
+            raise psycopg2.Error(f"🔴[DEBUG]: 查詢 PostgreSQL 資料發生非預期錯誤: {e}")
         finally:
             cursor.close()
 
@@ -56,8 +59,10 @@ class PostgresqlAdapter(IDatabaseAdapter):
         try:
             self._conn.close()
             logging.info(f"🟢 PostgreSQL DB 連線已關閉")
+        except psycopg2.Error as e:
+            raise psycopg2.Error(f"🔴[DEBUG]: PostgreSQL DB 關閉連線錯誤: {e}")
         except Exception as e:
-            logging.error(f"🔴 PostgreSQL DB 關閉連線非預期錯誤: {e}")
+            raise psycopg2.Error(f"🔴[DEBUG]: PostgreSQL DB 關閉連線非預期錯誤: {e}")
 
 
 if __name__ == "__main__":

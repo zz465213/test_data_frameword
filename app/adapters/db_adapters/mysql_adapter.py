@@ -1,11 +1,12 @@
 import logging
+import traceback
 import mysql.connector
+from app.exceptions.database_exception import *
 from app.adapters.db_adapters.idatabase_adapter import IDatabaseAdapter
 
 
 class MysqlAdapter(IDatabaseAdapter):
     def __init__(self, db_config):
-        self.logger = logging.getLogger(__name__)
         self._db_config = db_config
         self._conn = self._connect()
 
@@ -15,9 +16,13 @@ class MysqlAdapter(IDatabaseAdapter):
             logging.info(f"🟢 MySQL DB 連線成功")
             return conn
         except mysql.connector.Error as e:
-            logging.error(f"🔴 MySQL DB 連線錯誤: {e}")
+            raise DatabaseConnectException(f"🔴[DEBUG]: {__name__} 發生連線錯誤: {e}\n"
+                                           f"--- 打印錯誤追溯 ---\n"
+                                           f"{traceback.format_exc()}")
         except Exception as e:
-            logging.error(f"🔴 MySQL DB 連線發生非預期錯誤: {e}")
+            raise DatabaseConnectException(f"🔴[DEBUG]: {__name__} 發生非預期連線錯誤: {e}"
+                                           f"--- 打印錯誤追溯 ---\n"
+                                           f"{traceback.format_exc()}")
 
     def insert(self, sql, params=None):
         """
@@ -27,10 +32,12 @@ class MysqlAdapter(IDatabaseAdapter):
         try:
             cursor.execute(sql, params)
             self._conn.commit()
-            logging.info(f"🟢 新增 MySQL 資料成功")
-        except mysql.connector.Error as e:
-            logging.error(f"🔴 新增 MySQL 資料失敗: {e}")
+        except Exception as e:
             self._conn.rollback()
+            raise DatabaseInsertException(
+                message=f"🔴[DEBUG]: {__name__} 發生「插入」錯誤訊息: {e}\n"
+                        f"--- 打印錯誤追溯 ---\n"
+                        f"{traceback.format_exc()}")
         finally:
             cursor.close()
 
@@ -44,8 +51,10 @@ class MysqlAdapter(IDatabaseAdapter):
             read_data = cursor.fetchall()
             logging.info(f"🟢 查詢 MySQL 資料成功")
             return read_data
-        except mysql.connector.Error as e:
-            logging.error(f"🔴 查詢 MySQL 資料失敗: {e}")
+        except Exception as e:
+            DatabaseFetchFailException(message=f"🔴[DEBUG]: {__name__} 發生「搜尋」錯誤訊息: {e}"
+                                               f"--- 打印錯誤追溯 ---\n"
+                                               f"{traceback.format_exc()}")
         finally:
             cursor.close()
 
@@ -56,8 +65,14 @@ class MysqlAdapter(IDatabaseAdapter):
         try:
             self._conn.close()
             logging.info(f"🟢 MySQL DB 連線已關閉")
+        except mysql.connector.Error as e:
+            raise DatabaseConnectException(f"🔴[DEBUG]: {__name__} 關閉連線錯誤: {e}"
+                                           f"--- 打印錯誤追溯 ---\n"
+                                           f"{traceback.format_exc()}")
         except Exception as e:
-            logging.error(f"🔴 MySQL DB 關閉連線非預期錯誤: {e}")
+            raise DatabaseConnectException(f"🔴[DEBUG]: {__name__} 關閉連線非預期錯誤: {e}"
+                                           f"--- 打印錯誤追溯 ---\n"
+                                           f"{traceback.format_exc()}")
 
 
 if __name__ == "__main__":

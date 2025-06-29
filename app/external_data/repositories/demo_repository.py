@@ -1,12 +1,13 @@
-import logging
+import traceback
+import mysql.connector
 from app.adapters.db_factory import DBFactory
 from app.models.member_demo import MemberDemo
+from app.exceptions.database_exception import *
 from typing import List, Optional
 
 
 class DemoRepository:
     def __init__(self):
-        self.logger = logging.getLogger(__name__)
         self.mysql = DBFactory().get_mysql()
 
     def create_member(self, member_demo: MemberDemo) -> int:
@@ -14,34 +15,42 @@ class DemoRepository:
         創建成員資料
         Returns: 新建立的成員 ID
         """
-        sql = "INSERT INTO member (username, email, phone, age) VALUES (%s, %s, %s, %s)"
-        params = (member_demo.username, member_demo.email, member_demo.phone, member_demo.age)
-
         try:
+            sql = "INSERT INTO member (username, email, phone, age) VALUES (%s, %s, %s, %s)"
+            params = (member_demo.username, member_demo.email, member_demo.phone, member_demo.age)
             result = self.mysql.insert(sql, params)
             member_id = result.lastrowid if hasattr(result, 'lastrowid') else None
-
-            self.logger.info(f"🟢 成員資料建立成功，ID: {member_id}, 使用者名稱: {member_demo.username}")
             return member_id
-
-        except Exception as e:
-            self.logger.error(f"🔴 建立成員資料發生錯誤: {e}")
+        except mysql.connector.OperationalError as e:
+            raise DatabaseInsertException(f"🔴[DEBUG]: {__name__} 建置時發生操作問題: {e}\n"
+                                          f"--- 打印錯誤追溯 ---\n"
+                                          f"{traceback.format_exc()}")
+        except Exception:
             raise
 
     def get_member_all_data(self) -> List[MemberDemo]:
-        sql = "SELECT username, email, phone, age FROM member"
         try:
-            return self.mysql.fetch_all(sql)
-        except Exception as e:
-            logging.error(f"🔴 搜尋成員資料發生非預期錯誤, {e}")
+            sql = "SELECT username, email, phone, age FROM member"
+            member_data = self.mysql.fetch_all(sql)
+            if member_data is None:
+                raise DataNotFoundError(f"🔴[DEBUG]: {__name__} 查無資料")
+            return member_data
+        except mysql.connector.OperationalError as e:
+            raise DatabaseFetchFailException(f"🔴[DEBUG]: {__name__} 搜尋資料時發生操作問題: {e}\n"
+                                             f"--- 打印錯誤追溯 ---\n"
+                                             f"{traceback.format_exc()}")
+        except Exception:
             raise
 
     def get_member_by_phone(self, phone_no: str) -> Optional[MemberDemo]:
-        sql = "SELECT username, email, phone, age FROM member WHERE phone = %s"
         try:
+            sql = "SELECT username, email, phone, age FROM member WHERE phone = %s"
             return self.mysql.fetch_all(sql, (phone_no,))
-        except Exception as e:
-            logging.error(f"🔴 使用 {phone_no} 搜尋成員資料發生非預期錯誤, {e}")
+        except mysql.connector.OperationalError as e:
+            raise DatabaseFetchFailException(f"🔴[DEBUG]: {__name__} 搜尋Phone={phone_no}時發生操作問題: {e}\n"
+                                             f"--- 打印錯誤追溯 ---\n"
+                                             f"{traceback.format_exc()}")
+        except Exception:
             raise
 
 

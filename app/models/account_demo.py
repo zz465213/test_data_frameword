@@ -14,7 +14,7 @@ class AccountDemo(BaseModel):
         if not stripped_lower_username:
             # 雖然 Field(min_length=1) 已經會檢查非空，
             # 但在這裡額外檢查可以讓錯誤訊息更明確，並確保清理後的結果仍符合要求
-            raise ValueError("🔴 帳號不得為空")
+            raise ValueError("🔴[DEBUG]: 帳號不得為空")
         return stripped_lower_username
 
     @field_validator('password')
@@ -39,6 +39,6 @@ class AccountDemo(BaseModel):
 
         if not re.fullmatch(password_pattern, v):
             raise ValueError(
-                "🔴 密碼不符合複雜度要求：必須包含至少一個大寫字母、一個小寫字母、一個數字和一個特殊符號，且長度至少8碼。"
+                "🔴[DEBUG]: 密碼不符合複雜度要求：必須包含至少一個大寫字母、一個小寫字母、一個數字和一個特殊符號，且長度至少8碼。"
             )
         return v
