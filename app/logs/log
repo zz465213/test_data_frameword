@@ -1,0 +1,18 @@
+20250629_185622 - run.py:69 - run - ERROR - 'age'
+20250629_190017 - run.py:69 - run - ERROR - 🔴[DEBUG]: app.controllers.demo_controller Request Body 缺少必填寫欄位--- 打印錯誤追溯 ---
+NoneType: None
+
+20250629_190055 - run.py:69 - run - ERROR - 🔴[DEBUG]: app.controllers.demo_controller Request Body 缺少必填寫欄位['age']
+20250629_190140 - run.py:47 - run - ERROR - 4 validation errors for MemberDemo
+username
+  Field required [type=missing, input_value={}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+email
+  Field required [type=missing, input_value={}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+phone
+  Field required [type=missing, input_value={}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+age
+  Field required [type=missing, input_value={}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
